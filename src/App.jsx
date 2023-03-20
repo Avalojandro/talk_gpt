@@ -37,20 +37,24 @@ export default function App() {
     setIsRecording(false);
   };
 
-  const talk = () => {
-    const msg = responseGpt;
+  const talk = (answr) => {
+    setResponseGpt(answr);
     const voices = window.speechSynthesis.getVoices();
-    const utterance = new SpeechSynthesisUtterance(msg);
+    const utterance = new SpeechSynthesisUtterance(answr);
     utterance.voice = voices[0];
     utterance.pitch = 1;
     utterance.rate = 1;
     speechSynthesis.speak(utterance);
   }
 
+  const handleResponse = (answr) => {
+    talk(answr?.choices[0]?.text);
+  }
+
   const submit = () => {
     axios.post(`https://api.openai.com/v1/engines/${engine}/completions`, {
       prompt: transcript,
-      max_tokens: 100,
+      max_tokens: 500,
       n: 1,
       temperature: 0.5,
     }, {
@@ -58,11 +62,10 @@ export default function App() {
     })
     .then(response => {
       console.log(response.data);
-      setResponseGpt(response.data?.choices[0]?.text);
-      talk();
+      handleResponse(response?.data);
     })
     .catch(error => {
-
+      alert('Ha ocurrido un error');
     });
   };
 
@@ -120,7 +123,7 @@ export default function App() {
         </div>
 
           {responseGpt && (
-            <div className='mt-8 text-white w-2/4 text-justify' onClick={() => {talk();}}>
+            <div className='mt-8 text-white w-2/4 text-justify'>
               {responseGpt || ''}
             </div>
           )}
