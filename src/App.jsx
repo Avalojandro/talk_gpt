@@ -51,7 +51,11 @@ export default function App() {
     talk(answr?.choices[0]?.text);
   }
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const submit = () => {
+    setResponseGpt('');
+    setIsLoading(true);
     axios.post(`https://api.openai.com/v1/engines/${engine}/completions`, {
       prompt: transcript,
       max_tokens: 500,
@@ -62,10 +66,12 @@ export default function App() {
     })
     .then(response => {
       console.log(response.data);
+      setIsLoading(false);
       handleResponse(response?.data);
     })
     .catch(error => {
       alert('Ha ocurrido un error');
+      setTranscript('Ha ocurrido un error')
     });
   };
 
@@ -74,9 +80,9 @@ export default function App() {
 
     <div className='mb-14'>
     <div className=' font-bold text-[5.5rem] text-white'>
-      Talk_GPT
+      Talk<span className='text-green-500'>_GPT</span>
     </div>
-    <div className='text-white text-center'>By Avalojandro</div>
+    <div className='text-white text-center'>By <span className=' text-cyan-400'>Avalojandro</span></div>
     </div>
 
       <div className='mb-4'>
@@ -114,7 +120,7 @@ export default function App() {
                   }
             </div>
             <div className='w-8 ml-4'>
-            <button className='bg-cyan-500 hover:bg-cyan-600 transition-all p-2 rounded-lg' disabled={isRecording} onClick={submit}>
+            <button className='bg-cyan-500 hover:bg-cyan-600 transition-all p-2 rounded-lg' disabled={isRecording || transcript === ''} onClick={submit}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
               </svg>
@@ -122,12 +128,20 @@ export default function App() {
             </div>
         </div>
 
+          {isLoading && (
+            <div className='my-24'>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-10 h-10 animate-spin">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+            </div>
+          )}
+
           {responseGpt && (
-            <div className='mt-8 text-white w-2/4 text-justify'>
+            <div className='mt-8 typed font-mono text-white w-3/4 lg:w-1/4 text-justify'>
               {responseGpt || ''}
             </div>
           )}
-    
+
     </div>
   );
 }
